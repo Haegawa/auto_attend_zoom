@@ -27,8 +27,15 @@ class Zoom():
         self.exit_h = 17
         self.exit_m = 50
 
+        self.week_dic = {"月":0, "火":1, "水":2, "木":3, "金":4}
+        self.week_diff_l = [[0, 6, 5, 4, 3, 2, 1],
+                            [1, 0, 6, 5, 4, 3, 2],
+                            [2, 1, 0, 6, 5, 4, 3],
+                            [3, 2, 1, 0, 6, 5, 4],
+                            [4, 3, 2, 1, 0, 6, 5]]
+
         # パス関連
-        self.zoom_url = "https://u"
+        self.zoom_url = "https://us05web.zoom.us/j/82414886689?pwd=MndQd3ZrWm1wQkhHa1JBeDF4NGx4UT09"
         self.path0 = "path0.png"
         self.path1 = "path1.png"
         self.path2 = "path2.png"
@@ -67,18 +74,22 @@ class Zoom():
             pwa.keyboard.send_keys("{ENTER}")
 
     def capture_zoom(self):
-        try:
-            time.sleep(10)
-            zoom = pwa.Application(backend="uia").connect(best_match=u"Zoom ミーティング")
-            zoom[u"Zoom ミーティング"].set_focus() # 録画対象
-            print("録画対象zoom")
-            pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
-            print("録画中")
-            self.recode = 1
-            #time.sleep(10)
-            #pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画終了(Win+Alt+R)
-        except:
-            print("録画失敗")
+        while True:
+            try:
+                # zoomのミーティングウィンドウ情報取得
+                zoom = pwa.Application(backend="uia").connect(best_match=u"Zoom ミーティング")
+                break
+
+            except:
+                continue
+        
+        zoom[u"Zoom ミーティング"].set_focus() # 録画対象
+        print("録画対象zoom")
+        pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
+        print("録画中")
+        self.recode = 1
+        #time.sleep(10)
+        #pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画終了(Win+Alt+R)
 
     def get_today(self):
         dt_now = datetime.datetime.now()
@@ -86,24 +97,27 @@ class Zoom():
         print("dt_now", dt_now)
         
         # 今日の曜日取得(水曜日=2)
-        week_id = calendar.weekday(dt_now.year, dt_now.month, dt_now.day)
+        today_week_id = calendar.weekday(dt_now.year, dt_now.month, dt_now.day)
         
         now_time = int(time.mktime(dt_now.utctimetuple()))
-        print(now_time)
         
-        return dt_now, week_id, now_time
+        return dt_now, today_week_id, now_time
     
     def pre_processing_time(self):
-        dt_now, week_id, now_time = self.get_today()
-        enter_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day, self.enter_h, self.enter_m)
+        dt_now, today_week_id, now_time = self.get_today()
+        week_diff = self.week_diff_l[self.week_dic[self.week_id]][today_week_id]
+        print("week_diff", week_diff)
+        # if week_diff == 0:
+        #     if now_time 
+        enter_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day+week_diff, self.enter_h, self.enter_m)
+        print("enter_time", enter_time)
         enter_time = datetime.datetime.strptime(enter_time, '%Y-%m-%d %H:%M:%S')
         enter_time = int(time.mktime(enter_time.utctimetuple()))
-        print("enter_time", enter_time)
 
-        exit_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day, self.exit_h, self.exit_m)
+        exit_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day+week_diff, self.exit_h, self.exit_m)
+        print("exit_time", exit_time)
         exit_time = datetime.datetime.strptime(exit_time, '%Y-%m-%d %H:%M:%S')
         exit_time = int(time.mktime(exit_time.utctimetuple()))
-        print("exit_time", exit_time)
 
         return enter_time, exit_time
 
@@ -121,9 +135,13 @@ class Zoom():
         sg.Text("時"),
         sg.InputText(default_text="50",size=(10,1), key="exit_m", text_color="#000000"),
         sg.Text("分")]]
+
         L2=[[sg.Text("URL")],\
         [sg.InputText(default_text=self.zoom_url, size=(60,1), key="zoom_url",text_color="#000000")]]
-        L=[[sg.Frame("ミーティング時刻",L1)],\
+
+        L3 = [[sg.Combo(["月", "火", "水", "木", "金"], default_value="曜日を選択する", key="week_id", size=(25,1), readonly=True)]]
+
+        L=[[sg.Frame("ミーティング時刻",L1), sg.Frame("曜日",L3)],\
         [sg.Frame("ZoomのURL",L2)],\
         [sg.Checkbox("授業を録画する", default=True, pad=((0, 380),(0, 0))),
         sg.Button("実行",font=("", 13)),
@@ -136,10 +154,10 @@ class Zoom():
             event , values = window.read() # イベントの読み取り（イベント待ち）
             if event == "実行":
                 self.enter_h=values["enter_h"]
-                print(values["enter_h"])
                 self.enter_m=values["enter_m"]
                 self.exit_h=values["exit_h"]
                 self.exit_m=values["exit_m"]
+                self.week_id=values["week_id"]
                 self.zoom_url=values["zoom_url"]
                 button=values[0]
                 self.startEvent(event)
@@ -170,8 +188,6 @@ class Zoom():
         sys.exit() #アプリ終了
 
     def main(self):
-        print("入室時間", self.enter_h, "時", self.enter_m, "分")
-        print("退室時間", self.exit_h, "時" , self.exit_m, "分")
         enter_time, exit_time = self.pre_processing_time() 
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enterabs(enter_time, 1, self.enter_zoom)
