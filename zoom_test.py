@@ -35,7 +35,7 @@ class Zoom():
                             [4, 3, 2, 1, 0, 6, 5]]
 
         # パス関連
-        self.zoom_url = "https://us05web.zoom.us/j/82414886689?pwd=MndQd3ZrWm1wQkhHa1JBeDF4NGx4UT09"
+        self.zoom_url = ""
         self.path0 = "path0.png"
         self.path1 = "path1.png"
         self.path2 = "path2.png"
