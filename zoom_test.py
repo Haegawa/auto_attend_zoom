@@ -45,11 +45,6 @@ class Zoom():
                 x1, y1 = pg.center(p1)
                 pg.move(x1, y1)
                 pg.click(x1, y1)
-
-                time.sleep(3)
-                x2, y2 = pg.center(p2)
-                pg.move(x2, y2)
-                pg.click(x2, y2)
                 break
             except:
                 p0=pg.locateOnScreen(self.path0, confidence=0.8)
@@ -70,13 +65,18 @@ class Zoom():
 
     def capture_zoom(self):
         print("録画中")
-        if button:
+        try:
+            time.sleep(3)
+            zoom = pwa.Application(backend="uia").connect(best_match=u"Zoom ミーティング")
+            zoom[u"Zoom ミーティング"].set_focus() # 録画対象
+            print("録画対象zoom")
+            pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
             self.recode = 1
-        zoom = pwa.Application(backend="uia").connect(best_match=u"Zoom ミーティング")
-        zoom[u"Zoom ミーティング"].set_focus() # 録画対象
-        pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
-        #time.sleep(10)
-        #pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画終了(Win+Alt+R)
+            #time.sleep(10)
+            #pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画終了(Win+Alt+R)
+        except:
+            pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
+            self.recode = 1
 
     def get_today(self):
         dt_now = datetime.datetime.now()
@@ -110,22 +110,22 @@ class Zoom():
     def make_app(self):
         global enter_h, enter_m, exit_h, exit_m, zoom_url, zoom_pass, button
         L1=[[sg.Text("入室時間")],\
-        [sg.InputText(default_text="16",size=(10,1), key="enter_h",text_color="#000000"),
+        [sg.InputText(default_text="16",size=(10,1), key="enter_h", text_color="#000000"),
         sg.Text("時"),
-        sg.InputText(default_text="10",size=(10,1), key="enter_m",text_color="#000000"),
+        sg.InputText(default_text="10",size=(10,1), key="enter_m", text_color="#000000"),
         sg.Text("分")],\
         [sg.Text("退室時間")],\
-        [sg.InputText(default_text="17",size=(10,1), key="exit_h",text_color="#000000"),
+        [sg.InputText(default_text="17",size=(10,1), key="exit_h", text_color="#000000"),
         sg.Text("時"),
-        sg.InputText(default_text="50",size=(10,1), key="exit_m",text_color="#000000"),
+        sg.InputText(default_text="50",size=(10,1), key="exit_m", text_color="#000000"),
         sg.Text("分")]]
         L2=[[sg.Text("URL")],\
         [sg.InputText(default_text=self.defoult_zoom_url, size=(60,1), key="zoom_url",text_color="#000000")],\
         [sg.Text("パスワード(あれば)")],\
-        [sg.InputText(size=(60,1),key="zoom_pass",text_color="#000000")]]
+        [sg.InputText(size=(60,1),key="zoom_pass", text_color="#000000")]]
         L=[[sg.Frame("ミーティング時刻",L1)],\
         [sg.Frame("ZoomのURL",L2)],\
-        [sg.Checkbox("授業を録画する",default=False,pad=((0, 380),(0, 0))),
+        [sg.Checkbox("授業を録画する", default=True, pad=((0, 380),(0, 0))),
         sg.Button("実行",font=("", 13)),
         sg.Button("終了",font=("",13))]]
         # ウィンドウ作成
@@ -140,7 +140,7 @@ class Zoom():
                 exit_h=values["exit_h"]
                 exit_m=values["exit_m"]
                 zoom_url=values["zoom_url"]
-                tx6=values["zoom_pass"]
+                zoom_pass=values["zoom_pass"]
                 button=values[0]
                 self.startEvent(event)
 
