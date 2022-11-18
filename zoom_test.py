@@ -119,9 +119,7 @@ class Zoom():
         sg.InputText(default_text="50",size=(10,1), key="exit_m", text_color="#000000"),
         sg.Text("分")]]
         L2=[[sg.Text("URL")],\
-        [sg.InputText(default_text=self.defoult_zoom_url, size=(60,1), key="zoom_url",text_color="#000000")],\
-        [sg.Text("パスワード(あれば)")],\
-        [sg.InputText(size=(60,1),key="zoom_pass", text_color="#000000")]]
+        [sg.InputText(default_text=self.defoult_zoom_url, size=(60,1), key="zoom_url",text_color="#000000")]]
         L=[[sg.Frame("ミーティング時刻",L1)],\
         [sg.Frame("ZoomのURL",L2)],\
         [sg.Checkbox("授業を録画する", default=True, pad=((0, 380),(0, 0))),
