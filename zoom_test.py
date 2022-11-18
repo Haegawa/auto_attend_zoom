@@ -75,8 +75,7 @@ class Zoom():
             #time.sleep(10)
             #pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画終了(Win+Alt+R)
         except:
-            pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
-            self.recode = 1
+            pass
 
     def get_today(self):
         dt_now = datetime.datetime.now()
