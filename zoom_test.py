@@ -22,11 +22,13 @@ class Zoom():
         #日付日時関連
         self.week_id = 2
         self.year_id = 2022
-        self.hour_id = 16
-        self.minute_id = 10
+        self.enter_h = 16
+        self.enter_m = 10
+        self.exit_h = 17
+        self.exit_m = 50
 
         # パス関連
-        self.defoult_zoom_url = "XXX"
+        self.zoom_url = "https://u"
         self.path0 = "path0.png"
         self.path1 = "path1.png"
         self.path2 = "path2.png"
@@ -37,7 +39,7 @@ class Zoom():
     def enter_zoom(self):
         # zoomのURLに遷移
         print("入室")
-        webbrowser.open(zoom_url, new=2)
+        webbrowser.open(self.zoom_url, new=2)
         time.sleep(3)
         while True:
             try:
@@ -47,6 +49,7 @@ class Zoom():
                 pg.click(x1, y1)
                 break
             except:
+                time.sleep(3)
                 p0=pg.locateOnScreen(self.path0, confidence=0.8)
                 x0, y0 = pg.center(p0)
                 pg.move(x0, y0)
@@ -64,18 +67,18 @@ class Zoom():
             pwa.keyboard.send_keys("{ENTER}")
 
     def capture_zoom(self):
-        print("録画中")
         try:
-            time.sleep(3)
+            time.sleep(10)
             zoom = pwa.Application(backend="uia").connect(best_match=u"Zoom ミーティング")
             zoom[u"Zoom ミーティング"].set_focus() # 録画対象
             print("録画対象zoom")
             pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画開始(Win+Alt+R)
+            print("録画中")
             self.recode = 1
             #time.sleep(10)
             #pwa.keyboard.send_keys("{VK_LWIN down}%{R down}{VK_LWIN up}{R up}") # 録画終了(Win+Alt+R)
         except:
-            pass
+            print("録画失敗")
 
     def get_today(self):
         dt_now = datetime.datetime.now()
@@ -92,12 +95,12 @@ class Zoom():
     
     def pre_processing_time(self):
         dt_now, week_id, now_time = self.get_today()
-        enter_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day, enter_h, enter_m)
+        enter_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day, self.enter_h, self.enter_m)
         enter_time = datetime.datetime.strptime(enter_time, '%Y-%m-%d %H:%M:%S')
         enter_time = int(time.mktime(enter_time.utctimetuple()))
         print("enter_time", enter_time)
 
-        exit_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day, exit_h, exit_m)
+        exit_time = '{}-{}-{} {}:{}:00'.format(dt_now.year, dt_now.month, dt_now.day, self.exit_h, self.exit_m)
         exit_time = datetime.datetime.strptime(exit_time, '%Y-%m-%d %H:%M:%S')
         exit_time = int(time.mktime(exit_time.utctimetuple()))
         print("exit_time", exit_time)
@@ -107,9 +110,9 @@ class Zoom():
     ###UIで取り込む###
     # レイアウト
     def make_app(self):
-        global enter_h, enter_m, exit_h, exit_m, zoom_url, zoom_pass, button
+        global button
         L1=[[sg.Text("入室時間")],\
-        [sg.InputText(default_text="16",size=(10,1), key="enter_h", text_color="#000000"),
+        [sg.InputText(default_text=str(self.enter_h),size=(10,1), key="enter_h", text_color="#000000"),
         sg.Text("時"),
         sg.InputText(default_text="10",size=(10,1), key="enter_m", text_color="#000000"),
         sg.Text("分")],\
@@ -119,7 +122,7 @@ class Zoom():
         sg.InputText(default_text="50",size=(10,1), key="exit_m", text_color="#000000"),
         sg.Text("分")]]
         L2=[[sg.Text("URL")],\
-        [sg.InputText(default_text=self.defoult_zoom_url, size=(60,1), key="zoom_url",text_color="#000000")]]
+        [sg.InputText(default_text=self.zoom_url, size=(60,1), key="zoom_url",text_color="#000000")]]
         L=[[sg.Frame("ミーティング時刻",L1)],\
         [sg.Frame("ZoomのURL",L2)],\
         [sg.Checkbox("授業を録画する", default=True, pad=((0, 380),(0, 0))),
@@ -132,12 +135,12 @@ class Zoom():
         while True:
             event , values = window.read() # イベントの読み取り（イベント待ち）
             if event == "実行":
-                enter_h=values["enter_h"]
-                enter_m=values["enter_m"]
-                exit_h=values["exit_h"]
-                exit_m=values["exit_m"]
-                zoom_url=values["zoom_url"]
-                zoom_pass=values["zoom_pass"]
+                self.enter_h=values["enter_h"]
+                print(values["enter_h"])
+                self.enter_m=values["enter_m"]
+                self.exit_h=values["exit_h"]
+                self.exit_m=values["exit_m"]
+                self.zoom_url=values["zoom_url"]
                 button=values[0]
                 self.startEvent(event)
 
@@ -167,8 +170,8 @@ class Zoom():
         sys.exit() #アプリ終了
 
     def main(self):
-        print("入室時間",enter_h,"時",enter_m, "分")
-        print("退室時間",exit_h,"時" ,exit_m, "分")
+        print("入室時間", self.enter_h, "時", self.enter_m, "分")
+        print("退室時間", self.exit_h, "時" , self.exit_m, "分")
         enter_time, exit_time = self.pre_processing_time() 
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enterabs(enter_time, 1, self.enter_zoom)
