@@ -27,12 +27,14 @@ class Zoom():
         self.exit_h = 17
         self.exit_m = 50
 
-        self.week_dic = {"月":0, "火":1, "水":2, "木":3, "金":4}
+        self.week_dic = {"月":0, "火":1, "水":2, "木":3, "金":4, "土":5, "日":6}
         self.week_diff_l = [[0, 6, 5, 4, 3, 2, 1],
                             [1, 0, 6, 5, 4, 3, 2],
                             [2, 1, 0, 6, 5, 4, 3],
                             [3, 2, 1, 0, 6, 5, 4],
-                            [4, 3, 2, 1, 0, 6, 5]]
+                            [4, 3, 2, 1, 0, 6, 5],
+                            [5, 4, 3, 2, 1, 0, 6],
+                            [6, 5, 4, 3, 2, 1, 0]]
 
         # パス関連
         self.zoom_url = ""
@@ -139,7 +141,7 @@ class Zoom():
         L2=[[sg.Text("URL")],\
         [sg.InputText(default_text=self.zoom_url, size=(60,1), key="zoom_url",text_color="#000000")]]
 
-        L3 = [[sg.Combo(["月", "火", "水", "木", "金"], default_value="曜日を選択する", key="week_id", size=(25,1), readonly=True)]]
+        L3 = [[sg.Combo(["月", "火", "水", "木", "金", "土", "日"], default_value="曜日を選択する", key="week_id", size=(25,1), readonly=True)]]
 
         L=[[sg.Frame("ミーティング時刻",L1), sg.Frame("曜日",L3)],\
         [sg.Frame("ZoomのURL",L2)],\
