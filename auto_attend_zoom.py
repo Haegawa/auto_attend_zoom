@@ -38,9 +38,9 @@ class Zoom():
 
         # パス関連
         self.zoom_url = ""
-        self.path0 = "path0.png"
-        self.path1 = "path1.png"
-        self.path2 = "path2.png"
+        self.path0 = "fig/path0.png"
+        self.path1 = "fig/path1.png"
+        self.path2 = "fig/path2.png"
 
         # グローバル変数関連
         self.recode = 0
